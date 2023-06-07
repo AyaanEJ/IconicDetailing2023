@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link href="css/Booking.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="container2">
+    <a class="btn btn-custom" href="/index.html" class="nav-item nav-link">Tilbage</a>
+    <h3 style="font-size: 35px;">Book din tid hos Iconic Detailing</h3>
+        <div class="elem-group">
+          <div class="mb-5">
+            <label for="name">Navn</label>
+            <input type="text" placeholder="Fuldenavn" id="nameInp" class="form-control mb-3">
+          </div>
+          <div>
+            <div class="elem-group">
+            <label for="email">Email</label>
+            <input type="text" placeholder="Email" id="emailInp" class="form-control mb-3">
+          </div>
+            <div>
+              <div class="elem-group">
+            <label for="phone">Telfonnummer</label>
+            <input type="number" placeholder="Telfonnummer" id="tlfInp" class="form-control mb-3">
+            </div>
+            <div>
+              <div class="elem-group">
+              <label for="pakke">Vælg din pakke</label>
+              <select id="pakkeInp" name="pakkeInp" required>
+                  <option value=""></option>
+                  <option value="connecting">Stage 1</option>
+                  <option value="adjoining">Stage 2</option>
+                  <option value="adjacent">Stage 3</option>
+              </select>
+            </div>
+       <div class="elem-group inlined">
+          <label for="dato">Dato</label>
+          <input type="date" id="dateInp" class="form-control mb-3">
+        </div>
+       <div class="elem-group inlined">
+          <label for="tid">Tidspunkt</label>
+          
+            <input type="time" id="timePicker" class="form-control mb-3">
+         
+        </div>   
+        <div class="elem-group">
+            <label for="kommentar">Kommentar</label>
+          <textarea id="message"  placeholder=""></textarea>    
+        </div>
+        <button type="text" id="sub_btn" class="btn w-100  btn-outline-primary mb-3">Book nu</button>   
+  </div>  
+  
+  <script type="module">
+    // Import
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+  
+    // web app's Firebase configuration
+    const firebaseConfig = {
+          apiKey: "AIzaSyDXgzhEYjN_3m7W9G7Oe3CTtoBOa_xMA10",
+          authDomain: "iconicdetailing-75e28.firebaseapp.com",
+          databaseURL: "https://iconicdetailing-75e28-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "iconicdetailing-75e28",
+          storageBucket: "iconicdetailing-75e28.appspot.com",
+          messagingSenderId: "395943507932",
+          appId: "1:395943507932:web:77fd453bbd878992d68119"
+        };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    import { getDatabase, ref, set, child, get }
+        from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
+
+        const db = getDatabase();
+        const name = document.getElementById('nameInp');
+        const email = document.getElementById('emailInp');
+        const phone = document.getElementById('tlfInp');
+        const pakke = document.getElementById('pakkeInp');
+        const dato = document.getElementById('dateInp');
+        const tid = document.getElementById('timePicker');
+        const kommentar = document.getElementById('message');
+        const submit = document.getElementById('sub_btn');
+
+        function isEmptyOrSpaces(str){
+            return str === null || str.match(/^ *$/) !== null;
+        }
+
+        function Validation(){
+            let nameregex = /^[a-zA-Z\s]+$/;
+            let emailregex = /^[a-zA-Z0-9]+@(gmail|yahoo|hotmail|outlook|live)\.(dk|com)$/;
+            let phoneregex = /^[0-9]+$/; 
+
+            if(isEmptyOrSpaces(name.value) || isEmptyOrSpaces(email.value) || isEmptyOrSpaces(phone.value) || isEmptyOrSpaces(pakke.value) || isEmptyOrSpaces(dato.value) || isEmptyOrSpaces(tid.value)){
+                alert("Udfyld alle felter")
+                return false;
+            }
+
+            if(!nameregex.test(name.value)){
+                alert("Kun bogstaver i navnet!");
+                return false;
+            }
+
+            if(!emailregex.test(email.value)){
+                alert("Skriv en gyldig mail");
+                return false;
+            }
+
+            if(!phoneregex.test(phone.value)){
+                alert("kun tal i telefonnummer");
+                return false;
+            }
+            return true;
+        }
+
+        function RegisterBooking(){
+            if(!Validation()){
+                return;
+            };
+
+            const dbRef = ref(db);
+
+            get(child(dbRef, "BookingsList/"+ dato.value)).then((snapshot)=>{
+            if(snapshot.exists()){
+                alert("Datoen er allerede fuldt booket");
+            }
+
+            else{
+                set(ref(db, "BookingsList/" + dato.value),
+                {
+                    fullname: name.value,
+                    email: email.value,
+                    phone: phone.value,
+                    pakke: pakke.options[pakke.selectedIndex].text,
+                    dato: dato.value,
+                    tid: tid.value,
+                    kommentar: kommentar.value
+                })
+                .then(()=>{
+                    alert("Booking oprettet");
+                })
+                .catch((error)=>{
+                    alert("error" + error);
+            })
+        }
+    });
+}
+
+    submit.addEventListener('click', RegisterBooking);
+    
+    </script>      
+  </body>
+</html>
